@@ -20,6 +20,18 @@ Einstellung anpasst.
 - **Referenztabelle:** Alle 27 Kombinationen, sortier- und filterbar. Ein Klick
   auf eine Zeile übernimmt die Einstellung.
 
+## Als App installieren (Homescreen)
+
+Die Seite ist eine **PWA** (Progressive Web App) und lässt sich wie eine App
+auf dem Homescreen ablegen – mit eigenem Mäher-Icon, im Vollbild und ohne
+Zoom-Wackeln.
+
+- **iPhone/iPad (Safari):** Teilen-Symbol → „Zum Home-Bildschirm".
+- **Android (Chrome):** Menü ⋮ → „App installieren" / „Zum Startbildschirm
+  hinzufügen".
+
+Dank Service Worker funktioniert sie nach dem ersten Aufruf auch offline.
+
 ## Bedienung
 
 Es ist **kein Build-Schritt** nötig – reines HTML/CSS/JavaScript.
