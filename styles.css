@@ -227,3 +227,32 @@ html, body {
 
 .note { font-size: 0.8rem; color: var(--muted); margin-top: 14px; line-height: 1.5; }
 .footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 8px 0 30px; }
+
+/* ---------- Handy / kleine Bildschirme ---------- */
+@media (max-width: 560px) {
+  .topbar { flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 12px; }
+  .brand { gap: 10px; }
+  .logo { font-size: 30px; }
+  .topbar h1 { font-size: 1.25rem; }
+  .subtitle { font-size: 0.78rem; }
+  .mode-switch { width: 100%; }
+  .mode-btn { flex: 1; padding: 9px 8px; font-size: 0.82rem; }
+
+  .layout { margin: 16px auto; padding: 0 12px; gap: 14px; }
+  .panel { padding: 16px; }
+  .result-value { font-size: 2.6rem; }
+  .seg-btn { padding: 9px 2px; font-size: 0.82rem; }
+
+  .table-panel { padding: 16px 12px; }
+  .table-head { flex-direction: column; align-items: stretch; }
+  #table-filter { min-width: 0; width: 100%; }
+  #matrix-table { font-size: 0.82rem; }
+  #matrix-table th, #matrix-table td { padding: 8px 8px; }
+  .pos-pill { padding: 2px 7px; font-size: 0.72rem; }
+  .legend { gap: 10px 16px; }
+}
+
+@media (max-width: 380px) {
+  .result-value { font-size: 2.2rem; }
+  .pos-pill { font-size: 0.68rem; }
+}
