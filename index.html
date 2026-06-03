@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>H.O.C. Matrix · Earthwise Spindelmäher 1715-16EWG</title>
+  <meta name="description" content="Interaktive Schnitthöhen-Einstellung für den Earthwise Spindelmäher 1715-16EWG" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🌿</span>
+      <div>
+        <h1>H.O.C. Matrix</h1>
+        <p class="subtitle">Earthwise Spindelmäher · Modell 1715-16EWG · Schnitthöhen-Einstellung</p>
+      </div>
+    </div>
+    <nav class="mode-switch" role="tablist" aria-label="Modus">
+      <button id="tab-setup"  class="mode-btn is-active" role="tab" aria-selected="true">Einstellung → Höhe</button>
+      <button id="tab-height" class="mode-btn" role="tab" aria-selected="false">Höhe → Einstellung</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- ====== Linke Spalte: Steuerung ====== -->
+    <section class="panel controls" aria-label="Steuerung">
+
+      <!-- Modus: Einstellung wählen -->
+      <div id="panel-setup">
+        <h2 class="panel-title">Einstellung wählen</h2>
+        <p class="panel-desc">Stelle die drei Punkte am Mäher ein – die Schnitthöhe wird automatisch berechnet.</p>
+        <div id="component-controls" class="component-controls"></div>
+      </div>
+
+      <!-- Modus: Höhe wählen -->
+      <div id="panel-height" hidden>
+        <h2 class="panel-title">Wunschhöhe wählen</h2>
+        <p class="panel-desc">Wähle die gewünschte Schnitthöhe – die passende(n) Einstellung(en) werden angezeigt.</p>
+        <div class="height-picker">
+          <label for="height-select">Schnitthöhe</label>
+          <select id="height-select"></select>
+        </div>
+        <div id="height-results" class="height-results"></div>
+      </div>
+
+      <!-- Ergebnis-Anzeige -->
+      <div class="result-card" id="result-card">
+        <div class="result-main">
+          <span class="result-value" id="result-mm">–</span>
+          <span class="result-unit">mm</span>
+        </div>
+        <div class="result-sub">
+          <span id="result-inch">–</span> Zoll
+        </div>
+        <div class="result-bar">
+          <div class="result-bar-fill" id="result-bar-fill"></div>
+        </div>
+        <p class="result-setting" id="result-setting"></p>
+      </div>
+    </section>
+
+    <!-- ====== Rechte Spalte: Grafik ====== -->
+    <section class="panel visual" aria-label="Mäher-Grafik">
+      <h2 class="panel-title">Mäher-Ansicht</h2>
+      <div class="svg-wrap">
+        <svg id="mower-svg" viewBox="0 0 760 480" role="img"
+             aria-label="Schematische Seitenansicht des Spindelmähers">
+        </svg>
+      </div>
+      <ul class="legend">
+        <li><span class="dot dot-rad"></span> Rad</li>
+        <li><span class="dot dot-rahmen"></span> Rahmen</li>
+        <li><span class="dot dot-auf"></span> Aufhängung</li>
+        <li><span class="dot dot-cut"></span> Schnitthöhe</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- ====== Referenztabelle ====== -->
+  <section class="panel table-panel">
+    <div class="table-head">
+      <h2 class="panel-title">Komplette H.O.C. Referenztabelle</h2>
+      <input id="table-filter" type="search" placeholder="Filtern (z. B. „oben" oder „36")…" />
+    </div>
+    <div class="table-scroll">
+      <table id="matrix-table">
+        <thead>
+          <tr>
+            <th data-sort="mm" class="sortable">mm <span class="arrow"></span></th>
+            <th data-sort="inch" class="sortable">Zoll</th>
+            <th data-sort="rad">Rad</th>
+            <th data-sort="rahmen">Rahmen</th>
+            <th data-sort="aufhaengung">Aufhängung</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-tbody"></tbody>
+      </table>
+    </div>
+    <p class="note">
+      Hinweis: In der Original-Tabelle war die Kombination
+      <em>unten/unten/oben</em> doppelt (52&nbsp;mm und 59&nbsp;mm) und
+      <em>unten/unten/mitte</em> fehlte. Der 52-mm-Eintrag wurde – passend zum
+      Muster – der Aufhängungs-Position <em>mitte</em> zugeordnet, sodass alle
+      27 Kombinationen vollständig sind.
+    </p>
+  </section>
+
+  <footer class="footer">
+    <p>Inoffizielles Einstellungs-Tool · Daten aus der H.O.C. Matrix · Earthwise 1715-16EWG</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
