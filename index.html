@@ -46,9 +46,21 @@
 
       <!-- Ergebnis-Anzeige -->
       <div class="result-card" id="result-card">
-        <div class="result-main">
-          <span class="result-value" id="result-mm">–</span>
-          <span class="result-unit">mm</span>
+        <div class="result-stepper">
+          <button class="step-btn" id="step-down" type="button"
+                  title="Nächst tiefere Schnitthöhe" aria-label="Nächst tiefere Schnitthöhe">
+            <span class="step-sign">−</span>
+            <span class="step-cap">tiefer</span>
+          </button>
+          <div class="result-main">
+            <span class="result-value" id="result-mm">–</span>
+            <span class="result-unit">mm</span>
+          </div>
+          <button class="step-btn" id="step-up" type="button"
+                  title="Nächst höhere Schnitthöhe" aria-label="Nächst höhere Schnitthöhe">
+            <span class="step-sign">+</span>
+            <span class="step-cap">höher</span>
+          </button>
         </div>
         <div class="result-sub">
           <span id="result-inch">–</span> Zoll
@@ -57,6 +69,7 @@
           <div class="result-bar-fill" id="result-bar-fill"></div>
         </div>
         <p class="result-setting" id="result-setting"></p>
+        <p class="result-change" id="result-change" hidden></p>
       </div>
     </section>
 
@@ -81,7 +94,6 @@
   <section class="panel table-panel">
     <div class="table-head">
       <h2 class="panel-title">Komplette H.O.C. Referenztabelle</h2>
-      <input id="table-filter" type="search" placeholder="Filtern (z. B. „oben" oder „36")…" />
     </div>
     <div class="table-scroll">
       <table id="matrix-table">
@@ -97,13 +109,6 @@
         <tbody id="matrix-tbody"></tbody>
       </table>
     </div>
-    <p class="note">
-      Hinweis: In der Original-Tabelle war die Kombination
-      <em>unten/unten/oben</em> doppelt (52&nbsp;mm und 59&nbsp;mm) und
-      <em>unten/unten/mitte</em> fehlte. Der 52-mm-Eintrag wurde – passend zum
-      Muster – der Aufhängungs-Position <em>mitte</em> zugeordnet, sodass alle
-      27 Kombinationen vollständig sind.
-    </p>
   </section>
 
   <footer class="footer">

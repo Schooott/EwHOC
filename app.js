@@ -6,6 +6,24 @@
 const lookup = new Map();
 HOC_MATRIX.forEach((r) => lookup.set(`${r.rad}|${r.rahmen}|${r.aufhaengung}`, r));
 
+// ---- Eindeutige Schnitthöhen (aufsteigend) für die +/- Stufen-Buttons ----
+const UNIQUE_HEIGHTS = [...new Set(HOC_MATRIX.map((r) => r.mm))].sort((a, b) => a - b);
+// Kombination einer Höhe mit den wenigsten Umstellungen gegenüber "ref"
+function closestComboFor(mm, ref) {
+  const results = HOC_MATRIX.filter((r) => r.mm === mm);
+  let best = results[0];
+  let bestDist = Infinity;
+  for (const r of results) {
+    const dist =
+      (r.rad !== ref.rad) + (r.rahmen !== ref.rahmen) + (r.aufhaengung !== ref.aufhaengung);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = r;
+    }
+  }
+  return best;
+}
+
 const COMPONENT_COLORS = {
   rad: "#2e6fd6",
   rahmen: "#d6692e",
@@ -15,6 +33,8 @@ const COMPONENT_COLORS = {
 // ---- Zustand ----
 const state = { rad: "mitte", rahmen: "mitte", aufhaengung: "mitte" };
 let tableSort = { key: "mm", dir: 1 };
+// Merkt sich, was beim letzten +/- Schritt umgestellt wurde (für die Hinweis-Zeile)
+let stepChange = null;
 
 // =========================================================
 //  Steuerung (Einstellungs-Modus)
@@ -44,6 +64,7 @@ function buildControls() {
     btn.addEventListener("click", () => {
       const comp = btn.parentElement.dataset.comp;
       state[comp] = btn.dataset.pos;
+      stepChange = null;
       updateAll();
     });
   });
@@ -71,13 +92,23 @@ function buildHeightPicker() {
   sel.innerHTML = mms
     .map((mm) => `<option value="${mm}">${mm} mm  (${byMm.get(mm).toFixed(2)} Zoll)</option>`)
     .join("");
-  sel.addEventListener("change", () => renderHeightResults(Number(sel.value)));
+  sel.addEventListener("change", () => {
+    stepChange = null;
+    renderHeightResults(Number(sel.value));
+  });
   renderHeightResults(mms[0]);
 }
 
 function renderHeightResults(mm) {
   const results = HOC_MATRIX.filter((r) => r.mm === mm);
   const box = document.getElementById("height-results");
+
+  // Aktive Karte = die zur aktuellen Einstellung passende, sonst die erste
+  let activeIdx = results.findIndex(
+    (r) => r.rad === state.rad && r.rahmen === state.rahmen && r.aufhaengung === state.aufhaengung
+  );
+  if (activeIdx === -1) activeIdx = 0;
+
   box.innerHTML =
     `<p class="panel-desc" style="margin:0 0 4px">${
       results.length > 1
@@ -87,7 +118,7 @@ function renderHeightResults(mm) {
     results
       .map(
         (r, i) => `
-      <div class="combo-card${i === 0 ? " is-active" : ""}"
+      <div class="combo-card${i === activeIdx ? " is-active" : ""}"
            data-rad="${r.rad}" data-rahmen="${r.rahmen}" data-auf="${r.aufhaengung}">
         <strong>${r.mm} mm · ${r.inch.toFixed(2)} Zoll</strong>
         <div class="combo-grid">
@@ -103,6 +134,7 @@ function renderHeightResults(mm) {
     card.addEventListener("click", () => {
       box.querySelectorAll(".combo-card").forEach((c) => c.classList.remove("is-active"));
       card.classList.add("is-active");
+      stepChange = null;
       state.rad = card.dataset.rad;
       state.rahmen = card.dataset.rahmen;
       state.aufhaengung = card.dataset.auf;
@@ -112,11 +144,12 @@ function renderHeightResults(mm) {
     });
   });
 
-  // Erste Kombination als aktive Auswahl übernehmen
-  if (results[0]) {
-    state.rad = results[0].rad;
-    state.rahmen = results[0].rahmen;
-    state.aufhaengung = results[0].aufhaengung;
+  // Aktive Kombination als Einstellung übernehmen
+  const active = results[activeIdx];
+  if (active) {
+    state.rad = active.rad;
+    state.rahmen = active.rahmen;
+    state.aufhaengung = active.aufhaengung;
     renderResult();
     renderMower();
     highlightTableRow();
@@ -136,12 +169,18 @@ function renderResult() {
   const inchEl = document.getElementById("result-inch");
   const fill = document.getElementById("result-bar-fill");
   const setting = document.getElementById("result-setting");
+  const changeEl = document.getElementById("result-change");
+  const stepDown = document.getElementById("step-down");
+  const stepUp = document.getElementById("step-up");
 
   if (!e) {
     mmEl.textContent = "–";
     inchEl.textContent = "–";
     fill.style.width = "0%";
     setting.textContent = "Diese Kombination ist nicht in der Matrix vorhanden.";
+    changeEl.hidden = true;
+    stepDown.disabled = true;
+    stepUp.disabled = true;
     return;
   }
   mmEl.textContent = e.mm;
@@ -150,6 +189,60 @@ function renderResult() {
   fill.style.width = `${pct}%`;
   setting.textContent =
     `Rad: ${POSITION_LABEL[e.rad]} · Rahmen: ${POSITION_LABEL[e.rahmen]} · Aufhängung: ${POSITION_LABEL[e.aufhaengung]}`;
+
+  // +/- Buttons an den Grenzen deaktivieren
+  const idx = UNIQUE_HEIGHTS.indexOf(e.mm);
+  stepDown.disabled = idx <= 0;
+  stepUp.disabled = idx === -1 || idx >= UNIQUE_HEIGHTS.length - 1;
+
+  // Hinweis: was wurde beim letzten Schritt umgestellt?
+  if (stepChange && stepChange.length) {
+    changeEl.innerHTML =
+      "Umstellen: " +
+      stepChange
+        .map(
+          (c) =>
+            `<b>${c.label}</b> ${POSITION_LABEL[c.from]} → ${POSITION_LABEL[c.to]}`
+        )
+        .join(" · ");
+    changeEl.hidden = false;
+  } else {
+    changeEl.hidden = true;
+  }
+}
+
+// Eine Stufe höher (+1) oder tiefer (-1) springen
+function stepHeight(dir) {
+  const e = currentEntry();
+  const curMm = e ? e.mm : UNIQUE_HEIGHTS[0];
+  const idx = UNIQUE_HEIGHTS.indexOf(curMm);
+  const nextIdx = idx + dir;
+  if (nextIdx < 0 || nextIdx >= UNIQUE_HEIGHTS.length) return;
+
+  const targetMm = UNIQUE_HEIGHTS[nextIdx];
+  const before = { ...state };
+  // Unter allen Kombinationen dieser Höhe die mit den wenigsten Umstellungen wählen
+  const target = closestComboFor(targetMm, before);
+
+  state.rad = target.rad;
+  state.rahmen = target.rahmen;
+  state.aufhaengung = target.aufhaengung;
+
+  // Welche Einstellpunkte ändern sich gegenüber vorher?
+  stepChange = COMPONENTS.filter((c) => before[c.key] !== state[c.key]).map((c) => ({
+    label: c.label,
+    from: before[c.key],
+    to: state[c.key],
+  }));
+
+  // Im Höhen-Modus zusätzlich Auswahl im Dropdown mitführen
+  const heightPanel = document.getElementById("panel-height");
+  if (heightPanel && !heightPanel.hidden) {
+    document.getElementById("height-select").value = targetMm;
+    renderHeightResults(targetMm);
+  } else {
+    updateAll();
+  }
 }
 
 // =========================================================
@@ -353,10 +446,9 @@ function holeStrip(cx, topY, compKey, selected, leaderX, leaderY) {
 // =========================================================
 //  Referenztabelle
 // =========================================================
-function renderTable(filter = "") {
+function renderTable() {
   const tbody = document.getElementById("matrix-tbody");
-  const f = filter.trim().toLowerCase();
-  let rows = [...HOC_MATRIX];
+  const rows = [...HOC_MATRIX];
 
   rows.sort((a, b) => {
     const k = tableSort.key;
@@ -364,15 +456,6 @@ function renderTable(filter = "") {
     if (typeof av === "number") return (av - bv) * tableSort.dir;
     return String(av).localeCompare(String(bv)) * tableSort.dir;
   });
-
-  if (f) {
-    rows = rows.filter((r) =>
-      [r.mm, r.inch, POSITION_LABEL[r.rad], POSITION_LABEL[r.rahmen], POSITION_LABEL[r.aufhaengung]]
-        .join(" ")
-        .toLowerCase()
-        .includes(f)
-    );
-  }
 
   tbody.innerHTML = rows
     .map(
@@ -389,6 +472,7 @@ function renderTable(filter = "") {
 
   tbody.querySelectorAll("tr").forEach((tr) => {
     tr.addEventListener("click", () => {
+      stepChange = null;
       state.rad = tr.dataset.rad;
       state.rahmen = tr.dataset.rahmen;
       state.aufhaengung = tr.dataset.auf;
@@ -418,11 +502,8 @@ function setupTableSorting() {
       const key = th.dataset.sort;
       if (tableSort.key === key) tableSort.dir *= -1;
       else tableSort = { key, dir: 1 };
-      renderTable(document.getElementById("table-filter").value);
+      renderTable();
     });
-  });
-  document.getElementById("table-filter").addEventListener("input", (ev) => {
-    renderTable(ev.target.value);
   });
 }
 
@@ -460,6 +541,9 @@ function init() {
 
   document.getElementById("tab-setup").addEventListener("click", () => switchMode("setup"));
   document.getElementById("tab-height").addEventListener("click", () => switchMode("height"));
+
+  document.getElementById("step-down").addEventListener("click", () => stepHeight(-1));
+  document.getElementById("step-up").addEventListener("click", () => stepHeight(1));
 
   updateAll();
 }
