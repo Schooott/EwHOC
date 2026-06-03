@@ -36,6 +36,12 @@ let tableSort = { key: "mm", dir: 1 };
 // Merkt sich, was beim letzten +/- Schritt umgestellt wurde (für die Hinweis-Zeile)
 let stepChange = null;
 
+// ---- Sprache (i18n) ----
+let LANG = "en";
+let L = I18N.en;
+// Mutabler Alias für die Positions-Labels (oben/mitte/unten -> übersetzt)
+let POSITION_LABEL = L.pos;
+
 // =========================================================
 //  Steuerung (Einstellungs-Modus)
 // =========================================================
@@ -48,9 +54,9 @@ function buildControls() {
     el.innerHTML = `
       <div class="component-head">
         <span class="component-name">
-          <span class="swatch ${comp.key}"></span>${comp.label}
+          <span class="swatch ${comp.key}"></span>${L.comp[comp.key]}
         </span>
-        <span class="component-hint">${comp.hint}</span>
+        <span class="component-hint">${L.compHint[comp.key]}</span>
       </div>
       <div class="segmented" data-comp="${comp.key}">
         ${POSITIONS.map(
@@ -82,16 +88,25 @@ function refreshControlButtons() {
 // =========================================================
 //  Höhen-Modus
 // =========================================================
-function buildHeightPicker() {
+// Befüllt das Höhen-Dropdown (Auswahl bleibt erhalten) und liefert die Höhenliste
+function populateHeightSelect() {
   const sel = document.getElementById("height-select");
   const byMm = new Map();
   HOC_MATRIX.forEach((r) => {
     if (!byMm.has(r.mm)) byMm.set(r.mm, r.inch);
   });
   const mms = [...byMm.keys()].sort((a, b) => a - b);
+  const prev = sel.value;
   sel.innerHTML = mms
-    .map((mm) => `<option value="${mm}">${mm} mm  (${byMm.get(mm).toFixed(2)} Zoll)</option>`)
+    .map((mm) => `<option value="${mm}">${L.optionFmt(mm, byMm.get(mm))}</option>`)
     .join("");
+  if (prev) sel.value = prev;
+  return mms;
+}
+
+function buildHeightPicker() {
+  const sel = document.getElementById("height-select");
+  const mms = populateHeightSelect();
   sel.addEventListener("change", () => {
     stepChange = null;
     renderHeightResults(Number(sel.value));
@@ -111,20 +126,18 @@ function renderHeightResults(mm) {
 
   box.innerHTML =
     `<p class="panel-desc" style="margin:0 0 4px">${
-      results.length > 1
-        ? `${results.length} mögliche Einstellungen für ${mm} mm:`
-        : `Einstellung für ${mm} mm:`
+      results.length > 1 ? L.settingForMany(results.length, mm) : L.settingForOne(mm)
     }</p>` +
     results
       .map(
         (r, i) => `
       <div class="combo-card${i === activeIdx ? " is-active" : ""}"
            data-rad="${r.rad}" data-rahmen="${r.rahmen}" data-auf="${r.aufhaengung}">
-        <strong>${r.mm} mm · ${r.inch.toFixed(2)} Zoll</strong>
+        <strong>${r.mm} mm · ${r.inch.toFixed(2)} ${L.unit}</strong>
         <div class="combo-grid">
-          <span class="combo-cell"><span class="k">Rad</span><span class="v">${POSITION_LABEL[r.rad]}</span></span>
-          <span class="combo-cell"><span class="k">Rahmen</span><span class="v">${POSITION_LABEL[r.rahmen]}</span></span>
-          <span class="combo-cell"><span class="k">Aufhängung</span><span class="v">${POSITION_LABEL[r.aufhaengung]}</span></span>
+          <span class="combo-cell"><span class="k">${L.comp.rad}</span><span class="v">${POSITION_LABEL[r.rad]}</span></span>
+          <span class="combo-cell"><span class="k">${L.comp.rahmen}</span><span class="v">${POSITION_LABEL[r.rahmen]}</span></span>
+          <span class="combo-cell"><span class="k">${L.comp.aufhaengung}</span><span class="v">${POSITION_LABEL[r.aufhaengung]}</span></span>
         </div>
       </div>`
       )
@@ -177,7 +190,7 @@ function renderResult() {
     mmEl.textContent = "–";
     inchEl.textContent = "–";
     fill.style.width = "0%";
-    setting.textContent = "Diese Kombination ist nicht in der Matrix vorhanden.";
+    setting.textContent = L.notInMatrix;
     changeEl.hidden = true;
     stepDown.disabled = true;
     stepUp.disabled = true;
@@ -188,7 +201,7 @@ function renderResult() {
   const pct = ((e.mm - MM_MIN) / (MM_MAX - MM_MIN)) * 100;
   fill.style.width = `${pct}%`;
   setting.textContent =
-    `Rad: ${POSITION_LABEL[e.rad]} · Rahmen: ${POSITION_LABEL[e.rahmen]} · Aufhängung: ${POSITION_LABEL[e.aufhaengung]}`;
+    `${L.comp.rad}: ${POSITION_LABEL[e.rad]} · ${L.comp.rahmen}: ${POSITION_LABEL[e.rahmen]} · ${L.comp.aufhaengung}: ${POSITION_LABEL[e.aufhaengung]}`;
 
   // +/- Buttons an den Grenzen deaktivieren
   const idx = UNIQUE_HEIGHTS.indexOf(e.mm);
@@ -198,12 +211,10 @@ function renderResult() {
   // Hinweis: was wurde beim letzten Schritt umgestellt?
   if (stepChange && stepChange.length) {
     changeEl.innerHTML =
-      "Umstellen: " +
+      L.changePrefix +
+      " " +
       stepChange
-        .map(
-          (c) =>
-            `<b>${c.label}</b> ${POSITION_LABEL[c.from]} → ${POSITION_LABEL[c.to]}`
-        )
+        .map((c) => `<b>${L.comp[c.key]}</b> ${POSITION_LABEL[c.from]} → ${POSITION_LABEL[c.to]}`)
         .join(" · ");
     changeEl.hidden = false;
   } else {
@@ -230,7 +241,7 @@ function stepHeight(dir) {
 
   // Welche Einstellpunkte ändern sich gegenüber vorher?
   stepChange = COMPONENTS.filter((c) => before[c.key] !== state[c.key]).map((c) => ({
-    label: c.label,
+    key: c.key,
     from: before[c.key],
     to: state[c.key],
   }));
@@ -341,7 +352,7 @@ function renderMower() {
     <g transform="translate(95, ${(Y0 + reelBottomY) / 2})">
       <rect x="-46" y="-22" width="92" height="44" rx="9" fill="#fff" stroke="${getAccent()}" stroke-width="2"/>
       <text x="0" y="-2" text-anchor="middle" font-size="20" font-weight="800" fill="#14361f">${mm} mm</text>
-      <text x="0" y="16" text-anchor="middle" font-size="12" fill="#5c6b62">${e ? e.inch.toFixed(2) : "–"} Zoll</text>
+      <text x="0" y="16" text-anchor="middle" font-size="12" fill="#5c6b62">${e ? e.inch.toFixed(2) : "–"} ${L.unit}</text>
     </g>
 
     <!-- ===== Einstell-Lochleisten ===== -->
@@ -408,7 +419,7 @@ function cutGrass(Y0, cutY, fromX) {
 /* Lochleiste mit 3 Positionen (oben/mitte/unten), markiert die gewählte. */
 function holeStrip(cx, topY, compKey, selected, leaderX, leaderY) {
   const color = COMPONENT_COLORS[compKey];
-  const label = COMPONENTS.find((c) => c.key === compKey).label;
+  const label = L.comp[compKey];
   const spacing = 26;
   const positions = ["oben", "mitte", "unten"];
   const stripH = spacing * 2 + 36;
@@ -531,19 +542,96 @@ function updateAll() {
 }
 
 // =========================================================
+//  Sprache anwenden / wechseln
+// =========================================================
+function applyHeadI18n() {
+  document.documentElement.lang = L.htmlLang;
+  document.title = L.title;
+  const set = (sel, attr, val) => {
+    const el = document.querySelector(sel);
+    if (el) el.setAttribute(attr, val);
+  };
+  set('meta[name="description"]', "content", L.desc);
+  set('meta[property="og:title"]', "content", L.title);
+  set('meta[property="og:description"]', "content", L.desc);
+  set('meta[property="og:locale"]', "content", L.ogLocale);
+  set('meta[name="twitter:title"]', "content", L.title);
+  set('meta[name="twitter:description"]', "content", L.desc);
+}
+
+function applyStaticI18n() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const v = L[el.dataset.i18n];
+    if (typeof v === "string") el.textContent = v;
+  });
+  document.querySelectorAll("[data-i18n-comp]").forEach((el) => {
+    el.textContent = L.comp[el.dataset.i18nComp];
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    const v = L[el.dataset.i18nTitle];
+    if (typeof v === "string") el.setAttribute("title", v);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    const v = L[el.dataset.i18nAria];
+    if (typeof v === "string") el.setAttribute("aria-label", v);
+  });
+}
+
+function updateLangToggle() {
+  const btn = document.getElementById("lang-toggle");
+  if (!btn) return;
+  btn.textContent = L.langToggle;
+  btn.setAttribute("title", L.langToggleTitle);
+  btn.setAttribute("aria-label", L.langToggleTitle);
+}
+
+function setLanguage(lang) {
+  LANG = lang === "de" ? "de" : "en";
+  L = I18N[LANG];
+  POSITION_LABEL = L.pos;
+  try {
+    localStorage.setItem("hoc-lang", LANG);
+  } catch (e) {}
+
+  applyHeadI18n();
+  applyStaticI18n();
+  updateLangToggle();
+
+  // Dynamische Bereiche mit neuen Beschriftungen neu aufbauen (Zustand bleibt erhalten)
+  buildControls();
+  const sel = document.getElementById("height-select");
+  const cur = currentEntry();
+  populateHeightSelect();
+  if (cur) sel.value = cur.mm;
+  renderHeightResults(cur ? cur.mm : Number(sel.value));
+  renderTable();
+  updateAll();
+}
+
+// =========================================================
 //  Init
 // =========================================================
 function init() {
+  LANG = detectLang();
+  L = I18N[LANG];
+  POSITION_LABEL = L.pos;
+
   buildControls();
   buildHeightPicker();
   renderTable();
   setupTableSorting();
 
+  applyHeadI18n();
+  applyStaticI18n();
+  updateLangToggle();
+
   document.getElementById("tab-setup").addEventListener("click", () => switchMode("setup"));
   document.getElementById("tab-height").addEventListener("click", () => switchMode("height"));
-
   document.getElementById("step-down").addEventListener("click", () => stepHeight(-1));
   document.getElementById("step-up").addEventListener("click", () => stepHeight(1));
+
+  const langBtn = document.getElementById("lang-toggle");
+  if (langBtn) langBtn.addEventListener("click", () => setLanguage(LANG === "de" ? "en" : "de"));
 
   updateAll();
 }

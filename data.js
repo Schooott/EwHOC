@@ -49,16 +49,11 @@ const HOC_MATRIX = [
 // Reihenfolge der Positionen (oben = höchster Sitz, unten = tiefster Sitz)
 const POSITIONS = ["oben", "mitte", "unten"];
 
-const POSITION_LABEL = {
-  oben:  "Oben",
-  mitte: "Mitte",
-  unten: "Unten",
-};
-
+// Die drei Einstellpunkte (Beschriftungen kommen aus i18n.js)
 const COMPONENTS = [
-  { key: "rad",         label: "Rad",         hint: "Position der Radhalterung" },
-  { key: "rahmen",      label: "Rahmen",      hint: "Position am Rahmen" },
-  { key: "aufhaengung", label: "Aufhängung",  hint: "Position der Aufhängung" },
+  { key: "rad" },
+  { key: "rahmen" },
+  { key: "aufhaengung" },
 ];
 
 // Min/Max für Skalierung der Grafik

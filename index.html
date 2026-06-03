@@ -1,10 +1,36 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>H.O.C. Matrix · Earthwise Spindelmäher 1715-16EWG</title>
-  <meta name="description" content="Interaktive Schnitthöhen-Einstellung für den Earthwise Spindelmäher 1715-16EWG" />
+  <title>H.O.C. Matrix · Earthwise Reel Mower 1715-16EWG – Cutting Height Setup</title>
+  <meta name="description" content="Interactive tool to set the cutting height (height of cut) of the Earthwise 1715-16EWG reel mower. Adjust wheel, frame and mount, then read the cutting height in mm and inches – with a clear, adaptive mower graphic." />
+  <meta name="keywords" content="Earthwise 1715-16EWG, reel mower, cutting height, height of cut, HOC matrix, Spindelmäher, Schnitthöhe, lawn mower settings" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="H.O.C. Matrix" />
+
+  <!-- Canonical & Sprachvarianten (hreflang) -->
+  <link rel="canonical" href="https://schooott.github.io/ewhoc/" />
+  <link rel="alternate" hreflang="en" href="https://schooott.github.io/ewhoc/?lang=en" />
+  <link rel="alternate" hreflang="de" href="https://schooott.github.io/ewhoc/?lang=de" />
+  <link rel="alternate" hreflang="x-default" href="https://schooott.github.io/ewhoc/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="H.O.C. Matrix" />
+  <meta property="og:title" content="H.O.C. Matrix · Earthwise Reel Mower 1715-16EWG – Cutting Height Setup" />
+  <meta property="og:description" content="Interactive tool to set the cutting height of the Earthwise 1715-16EWG reel mower. Adjust wheel, frame and mount, read the height in mm and inches – with an adaptive mower graphic." />
+  <meta property="og:url" content="https://schooott.github.io/ewhoc/" />
+  <meta property="og:image" content="https://schooott.github.io/ewhoc/icons/icon-512.png" />
+  <meta property="og:image:alt" content="Earthwise reel mower icon" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="de_DE" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="H.O.C. Matrix · Earthwise Reel Mower 1715-16EWG" />
+  <meta name="twitter:description" content="Interactive cutting-height setup for the Earthwise 1715-16EWG reel mower – with an adaptive mower graphic." />
+  <meta name="twitter:image" content="https://schooott.github.io/ewhoc/icons/icon-512.png" />
 
   <!-- PWA / Homescreen -->
   <link rel="manifest" href="manifest.webmanifest" />
@@ -17,6 +43,28 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
 
+  <!-- Strukturierte Daten -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "H.O.C. Matrix – Earthwise 1715-16EWG",
+    "url": "https://schooott.github.io/ewhoc/",
+    "description": "Interactive tool to set the cutting height (height of cut) of the Earthwise 1715-16EWG reel mower. Adjust wheel, frame and mount and read the resulting cutting height in mm and inches, with an adaptive mower graphic.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Any (web browser)",
+    "inLanguage": ["en", "de"],
+    "browserRequirements": "Requires JavaScript.",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "about": {
+      "@type": "Product",
+      "name": "Earthwise 1715-16EWG reel mower",
+      "category": "Reel lawn mower"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,57 +73,62 @@
       <span class="logo" aria-hidden="true">🌿</span>
       <div>
         <h1>H.O.C. Matrix</h1>
-        <p class="subtitle">Earthwise Spindelmäher · Modell 1715-16EWG · Schnitthöhen-Einstellung</p>
+        <p class="subtitle" data-i18n="subtitle">Earthwise reel mower · Model 1715-16EWG · cutting-height setup</p>
       </div>
     </div>
-    <nav class="mode-switch" role="tablist" aria-label="Modus">
-      <button id="tab-setup"  class="mode-btn is-active" role="tab" aria-selected="true">Einstellung → Höhe</button>
-      <button id="tab-height" class="mode-btn" role="tab" aria-selected="false">Höhe → Einstellung</button>
-    </nav>
+    <div class="topbar-actions">
+      <button id="lang-toggle" class="lang-btn" type="button" title="Auf Deutsch umschalten" aria-label="Auf Deutsch umschalten">DE</button>
+      <nav class="mode-switch" role="tablist" aria-label="Mode">
+        <button id="tab-setup"  class="mode-btn is-active" role="tab" aria-selected="true" data-i18n="tabSetup">Setting → Height</button>
+        <button id="tab-height" class="mode-btn" role="tab" aria-selected="false" data-i18n="tabHeight">Height → Setting</button>
+      </nav>
+    </div>
   </header>
 
   <main class="layout">
-    <!-- ====== Linke Spalte: Steuerung ====== -->
-    <section class="panel controls" aria-label="Steuerung">
+    <!-- ====== Left column: controls ====== -->
+    <section class="panel controls" aria-label="Controls">
 
-      <!-- Modus: Einstellung wählen -->
+      <!-- Mode: choose setting -->
       <div id="panel-setup">
-        <h2 class="panel-title">Einstellung wählen</h2>
-        <p class="panel-desc">Stelle die drei Punkte am Mäher ein – die Schnitthöhe wird automatisch berechnet.</p>
+        <h2 class="panel-title" data-i18n="setupTitle">Choose a setting</h2>
+        <p class="panel-desc" data-i18n="setupDesc">Set the three points on the mower – the cutting height is calculated automatically.</p>
         <div id="component-controls" class="component-controls"></div>
       </div>
 
-      <!-- Modus: Höhe wählen -->
+      <!-- Mode: choose height -->
       <div id="panel-height" hidden>
-        <h2 class="panel-title">Wunschhöhe wählen</h2>
-        <p class="panel-desc">Wähle die gewünschte Schnitthöhe – die passende(n) Einstellung(en) werden angezeigt.</p>
+        <h2 class="panel-title" data-i18n="heightTitle">Choose a target height</h2>
+        <p class="panel-desc" data-i18n="heightDesc">Pick the desired cutting height – the matching setting(s) are shown.</p>
         <div class="height-picker">
-          <label for="height-select">Schnitthöhe</label>
+          <label for="height-select" data-i18n="heightLabel">Cutting height</label>
           <select id="height-select"></select>
         </div>
         <div id="height-results" class="height-results"></div>
       </div>
 
-      <!-- Ergebnis-Anzeige -->
+      <!-- Result display -->
       <div class="result-card" id="result-card">
         <div class="result-stepper">
           <button class="step-btn" id="step-down" type="button"
-                  title="Nächst tiefere Schnitthöhe" aria-label="Nächst tiefere Schnitthöhe">
+                  title="Next lower cutting height" aria-label="Next lower cutting height"
+                  data-i18n-title="stepLowerTitle" data-i18n-aria="stepLowerTitle">
             <span class="step-sign">−</span>
-            <span class="step-cap">tiefer</span>
+            <span class="step-cap" data-i18n="stepLower">lower</span>
           </button>
           <div class="result-main">
             <span class="result-value" id="result-mm">–</span>
             <span class="result-unit">mm</span>
           </div>
           <button class="step-btn" id="step-up" type="button"
-                  title="Nächst höhere Schnitthöhe" aria-label="Nächst höhere Schnitthöhe">
+                  title="Next higher cutting height" aria-label="Next higher cutting height"
+                  data-i18n-title="stepHigherTitle" data-i18n-aria="stepHigherTitle">
             <span class="step-sign">+</span>
-            <span class="step-cap">höher</span>
+            <span class="step-cap" data-i18n="stepHigher">higher</span>
           </button>
         </div>
         <div class="result-sub">
-          <span id="result-inch">–</span> Zoll
+          <span id="result-inch">–</span> <span data-i18n="unit">in</span>
         </div>
         <div class="result-bar">
           <div class="result-bar-fill" id="result-bar-fill"></div>
@@ -85,37 +138,37 @@
       </div>
     </section>
 
-    <!-- ====== Rechte Spalte: Grafik ====== -->
-    <section class="panel visual" aria-label="Mäher-Grafik">
-      <h2 class="panel-title">Mäher-Ansicht</h2>
+    <!-- ====== Right column: graphic ====== -->
+    <section class="panel visual" aria-label="Mower graphic">
+      <h2 class="panel-title" data-i18n="visualTitle">Mower view</h2>
       <div class="svg-wrap">
         <svg id="mower-svg" viewBox="0 0 760 480" role="img"
-             aria-label="Schematische Seitenansicht des Spindelmähers">
+             aria-label="Schematic side view of the reel mower">
         </svg>
       </div>
       <ul class="legend">
-        <li><span class="dot dot-rad"></span> Rad</li>
-        <li><span class="dot dot-rahmen"></span> Rahmen</li>
-        <li><span class="dot dot-auf"></span> Aufhängung</li>
-        <li><span class="dot dot-cut"></span> Schnitthöhe</li>
+        <li><span class="dot dot-rad"></span> <span data-i18n-comp="rad">Wheel</span></li>
+        <li><span class="dot dot-rahmen"></span> <span data-i18n-comp="rahmen">Frame</span></li>
+        <li><span class="dot dot-auf"></span> <span data-i18n-comp="aufhaengung">Mount</span></li>
+        <li><span class="dot dot-cut"></span> <span data-i18n="legendCut">Cutting height</span></li>
       </ul>
     </section>
   </main>
 
-  <!-- ====== Referenztabelle ====== -->
+  <!-- ====== Reference table ====== -->
   <section class="panel table-panel">
     <div class="table-head">
-      <h2 class="panel-title">Komplette H.O.C. Referenztabelle</h2>
+      <h2 class="panel-title" data-i18n="tableTitle">Complete H.O.C. reference table</h2>
     </div>
     <div class="table-scroll">
       <table id="matrix-table">
         <thead>
           <tr>
-            <th data-sort="mm" class="sortable">mm <span class="arrow"></span></th>
-            <th data-sort="inch" class="sortable">Zoll</th>
-            <th data-sort="rad">Rad</th>
-            <th data-sort="rahmen">Rahmen</th>
-            <th data-sort="aufhaengung">Aufhängung</th>
+            <th data-sort="mm" class="sortable" data-i18n="thMm">mm <span class="arrow"></span></th>
+            <th data-sort="inch" class="sortable" data-i18n="thIn">in</th>
+            <th data-sort="rad" data-i18n-comp="rad">Wheel</th>
+            <th data-sort="rahmen" data-i18n-comp="rahmen">Frame</th>
+            <th data-sort="aufhaengung" data-i18n-comp="aufhaengung">Mount</th>
           </tr>
         </thead>
         <tbody id="matrix-tbody"></tbody>
@@ -124,9 +177,10 @@
   </section>
 
   <footer class="footer">
-    <p>Inoffizielles Einstellungs-Tool · Daten aus der H.O.C. Matrix · Earthwise 1715-16EWG</p>
+    <p data-i18n="footer">Unofficial setup tool · Data from the H.O.C. matrix · Earthwise 1715-16EWG</p>
   </footer>
 
+  <script src="i18n.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
   <script>

@@ -55,6 +55,21 @@ html, body {
 .topbar h1 { margin: 0; font-size: 1.5rem; letter-spacing: 0.3px; }
 .subtitle { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.9; }
 
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.lang-btn {
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.lang-btn:hover { background: rgba(255, 255, 255, 0.3); border-color: #fff; }
+
 .mode-switch {
   display: flex;
   background: rgba(255, 255, 255, 0.15);
@@ -271,8 +286,10 @@ html, body {
   .logo { font-size: 30px; }
   .topbar h1 { font-size: 1.25rem; }
   .subtitle { font-size: 0.78rem; }
-  .mode-switch { width: 100%; }
+  .topbar-actions { width: 100%; }
+  .mode-switch { flex: 1; }
   .mode-btn { flex: 1; padding: 9px 8px; font-size: 0.82rem; }
+  .lang-btn { flex: 0 0 auto; }
 
   .layout { margin: 16px auto; padding: 0 12px; gap: 14px; }
   .panel { padding: 16px; }

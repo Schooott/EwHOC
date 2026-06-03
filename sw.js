@@ -1,10 +1,11 @@
 /* Service Worker für die H.O.C. Matrix App
    Cache-first für die statischen Dateien -> Installierbar & offline nutzbar. */
-const CACHE = "hoc-matrix-v1";
+const CACHE = "hoc-matrix-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
+  "./i18n.js",
   "./data.js",
   "./app.js",
   "./manifest.webmanifest",

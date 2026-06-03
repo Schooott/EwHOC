@@ -20,6 +20,16 @@ Einstellung anpasst.
 - **Referenztabelle:** Alle 27 Kombinationen, sortier- und filterbar. Ein Klick
   auf eine Zeile übernimmt die Einstellung.
 
+## Sprachen / Languages
+
+Die App ist zweisprachig (Deutsch/Englisch). Die Sprache wird automatisch
+anhand der Browsersprache gewählt – Deutsch bei deutschsprachigen Browsern,
+sonst Englisch. Oben rechts lässt sich die Sprache jederzeit umschalten
+(die Wahl wird gespeichert). Direkt ansteuerbar über `?lang=de` bzw.
+`?lang=en`. SEO-Tags (Title, Description, Open Graph, hreflang) werden je
+Sprache gesetzt; zusätzlich gibt es `robots.txt`, `sitemap.xml` und
+strukturierte Daten (JSON-LD).
+
 ## Als App installieren (Homescreen)
 
 Die Seite ist eine **PWA** (Progressive Web App) und lässt sich wie eine App
